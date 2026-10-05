@@ -110,7 +110,7 @@ body[data-theme="dark"]{background:#121614;color:#e9ece9}
 <div data-page-head="1" style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px">
 <div><div style="font-size:11px;letter-spacing:0.14em;color:var(--color-accent-700);font-weight:600">{{ pageKicker }}</div><div style="font-size:26px;font-weight:700;line-height:1.2;margin-top:3px">{{ pageTitle }}</div></div>
 <div style="display:flex;gap:8px;flex-wrap:wrap">
-<sc-if value="{{ canExport }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ exportCsv }}" style="border:1px solid var(--color-divider);background:transparent;color:var(--color-text);padding:9px 14px;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="background:var(--color-accent-100);border-color:var(--color-accent-300)">تصدير Excel</button></sc-if>
+<sc-if value="{{ canExport }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ exportCsv }}" style="border:1px solid var(--color-divider);background:transparent;color:var(--color-text);padding:9px 14px;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="background:var(--color-accent-100);border-color:var(--color-accent-300)">تصدير Excel</button><button type="button" onClick="{{ printList }}" style="border:1px solid var(--color-divider);background:transparent;color:var(--color-text);padding:9px 14px;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="background:var(--color-accent-100);border-color:var(--color-accent-300)">طباعة PDF</button></sc-if>
 <sc-if value="{{ canAdd }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ addNew }}" style="position:relative;border:1px solid var(--color-accent);background:var(--color-accent);color:#ffffff;padding:9px 18px;font-size:12.5px;font-weight:600;cursor:pointer" style-hover="background:var(--color-accent-600);border-color:var(--color-accent-600)">{{ addLabel }}<i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i></button></sc-if>
 </div>
 <sc-if value="{{ canAdd }}"><button type="button" data-fab="1" onClick="{{ addNew }}" style="display:none;position:fixed;inset-inline-start:16px;bottom:16px;z-index:18;border:1px solid var(--color-accent);background:var(--color-accent);color:#ffffff;padding:15px 22px;font-size:16px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,0.28)">{{ addLabel }}</button></sc-if>
@@ -128,6 +128,7 @@ body[data-theme="dark"]{background:#121614;color:#e9ece9}
 <input data-search="1" type="text" value="{{ q }}" onChange="{{ setQ }}" placeholder="بحث" style="flex:1 1 200px;min-width:0;border:1px solid var(--color-divider);background:transparent;padding:9px 12px;font-size:13px;color:var(--color-text)">
 {{ filterEl }}
 </div>
+<sc-if value="{{ efOn }}"><div data-print-hide="1" style="border:1px solid var(--color-accent-300);background:var(--color-accent-100);padding:12px 14px;margin-bottom:14px"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px"><label style="display:flex;flex-direction:column;gap:6px;min-width:0;font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:var(--color-accent-900)">حالة التسوية{{ efStat }}</label><label style="display:flex;flex-direction:column;gap:6px;min-width:0;font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:var(--color-accent-900)">العهدة{{ efCus }}</label><label style="display:flex;flex-direction:column;gap:6px;min-width:0;font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:var(--color-accent-900)">مركز التكلفة{{ efCc }}</label><label style="display:flex;flex-direction:column;gap:6px;min-width:0;font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:var(--color-accent-900)">بند المصروف{{ efItem }}</label><label style="display:flex;flex-direction:column;gap:6px;min-width:0;font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:var(--color-accent-900)">من تاريخ<input type="date" value="{{ efFrom }}" onChange="{{ setEfFrom }}" style="width:100%;min-width:0;border:1px solid var(--color-accent-300);background:#ffffff;padding:9px 11px;font-size:13px;line-height:1.35;color:var(--color-text)"></label><label style="display:flex;flex-direction:column;gap:6px;min-width:0;font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:var(--color-accent-900)">إلى تاريخ<input type="date" value="{{ efTo }}" onChange="{{ setEfTo }}" style="width:100%;min-width:0;border:1px solid var(--color-accent-300);background:#ffffff;padding:9px 11px;font-size:13px;line-height:1.35;color:var(--color-text)"></label></div><div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:10px"><span style="font-size:12px;font-weight:700;color:var(--color-accent-900)">{{ efNote }}</span><button type="button" onClick="{{ efReset }}" style="border:1px solid var(--color-accent-300);background:#ffffff;color:var(--color-accent-900);font-size:11.5px;font-weight:700;padding:6px 12px;cursor:pointer">إعادة الافتراضي (غير المسواة)</button></div></div></sc-if>
 <sc-if value="{{ isEmp }}" hint-placeholder-val="{{ true }}"><div>
 <div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.4fr) minmax(0,1.2fr) 90px 108px;column-gap:14px;padding:9px 0;border-bottom:1px solid var(--color-divider);font-size:11px;font-weight:600;color:var(--color-neutral-700);letter-spacing:0.05em"><span>الاسم</span><span>مركز التكلفة</span><span>الوظيفة</span><span>الحالة</span><span></span></div>
 <sc-for list="{{ rows }}" as="r" hint-placeholder-count="5"><div style="display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.4fr) minmax(0,1.2fr) 90px 108px;column-gap:14px;align-items:center;padding:11px 0;border-bottom:1px solid var(--color-divider);font-size:13px"><span style="font-weight:600">{{ r.c1 }}</span><span>{{ r.c2 }}</span><span>{{ r.c3 }}</span><span style="font-size:11.5px">{{ r.c4 }}</span><span style="display:flex;gap:6px"><sc-if value="{{ r.mayEdit }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ r.edit }}" style="border:1px solid var(--color-divider);background:transparent;color:var(--color-text);font-size:11.5px;padding:4px 9px;cursor:pointer" style-hover="background:var(--color-accent-100)">تعديل</button></sc-if><sc-if value="{{ r.mayDel }}"><button type="button" onClick="{{ r.del }}" style="border:1px solid var(--color-divider);background:transparent;color:var(--color-neutral-700);font-size:11.5px;padding:4px 9px;cursor:pointer" style-hover="color:var(--color-accent-900);background:var(--color-accent-100)">حذف</button></sc-if><sc-if value="{{ r.noAct }}"><span style="font-size:11px;color:var(--color-neutral-700)">للعرض</span></sc-if></span></div></sc-for>
@@ -190,6 +191,8 @@ body[data-theme="dark"]{background:#121614;color:#e9ece9}
 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:var(--color-accent-700);padding:11px 16px"><span style="font-size:13.5px;font-weight:700;color:#ffffff;letter-spacing:0.04em">فلاتر التقرير</span><button type="button" onClick="{{ clearFilters }}" style="border:1px solid rgba(255,255,255,0.55);background:transparent;color:#ffffff;font-size:11.5px;font-weight:700;padding:6px 12px;cursor:pointer" style-hover="background:rgba(255,255,255,0.16);border-color:#ffffff">تفريغ الفلاتر</button></div>
 <div style="padding:16px 16px 14px">
 <div data-filters="1" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:12px">
+<label style="display:flex;flex-direction:column;gap:6px;min-width:0;font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:var(--color-accent-900)">مصدر التقرير{{ fSrc }}</label>
+<label style="display:flex;flex-direction:column;gap:6px;min-width:0;font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:var(--color-accent-900)">البنك / الحساب (للمصروفات البنكية){{ fBank }}</label>
 <label style="display:flex;flex-direction:column;gap:6px;min-width:0;font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:var(--color-accent-900)">التسوية{{ fSettle }}</label>
 <label style="display:flex;flex-direction:column;gap:6px;min-width:0;font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:var(--color-accent-900)">العهدة{{ fCus }}</label>
 <label style="display:flex;flex-direction:column;gap:6px;min-width:0;font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:var(--color-accent-900)">نوع العهدة{{ fType }}</label>
@@ -209,9 +212,9 @@ body[data-theme="dark"]{background:#121614;color:#e9ece9}
 <sc-for list="{{ repKpis }}" as="k" hint-placeholder-count="4"><div><sc-if value="{{ k.solid }}" hint-placeholder-val="{{ true }}"><div style="border:1px solid var(--color-accent-700);background:var(--color-accent-700);padding:14px 16px"><div style="font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:rgba(255,255,255,0.85)">{{ k.label }}</div><div style="font-size:22px;font-weight:700;margin-top:5px;font-variant-numeric:tabular-nums;color:#ffffff">{{ k.value }}</div></div></sc-if><sc-if value="{{ k.plain }}"><div style="border:1px solid var(--color-accent-300);background:var(--color-accent-100);padding:14px 16px"><div style="font-size:10.5px;font-weight:700;letter-spacing:0.06em;color:var(--color-accent-700)">{{ k.label }}</div><div style="font-size:22px;font-weight:700;margin-top:5px;font-variant-numeric:tabular-nums;color:var(--color-accent-900)">{{ k.value }}</div></div></sc-if></div></sc-for>
 </div>
 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:24px;background:var(--color-accent-700);padding:11px 16px"><span style="font-size:14px;font-weight:700;color:#ffffff">نتائج التقرير<span style="font-size:11px;font-weight:600;color:rgba(255,255,255,0.78)"> — انقر أي سطر لعرض تفاصيله</span></span><span style="display:flex;gap:8px" data-print-hide="1"><sc-if value="{{ mayExport }}"><button type="button" onClick="{{ expResults }}" style="border:1px solid rgba(255,255,255,0.55);background:transparent;color:#ffffff;font-size:11.5px;font-weight:700;padding:6px 12px;cursor:pointer" style-hover="background:rgba(255,255,255,0.16);border-color:#ffffff">تصدير Excel</button></sc-if><sc-if value="{{ mayPreview }}"><button type="button" onClick="{{ printPdf }}" style="border:1px solid rgba(255,255,255,0.55);background:transparent;color:#ffffff;font-size:11.5px;font-weight:700;padding:6px 12px;cursor:pointer" style-hover="background:rgba(255,255,255,0.16);border-color:#ffffff">تصدير PDF</button></sc-if></span></div>
-<div data-print-head="1" style="margin-bottom:10px"><div style="font-size:17px;font-weight:700">{{ companyName }} — تقرير العهد والمصروفات</div><div style="font-size:12px;color:var(--color-neutral-700);margin-top:2px">{{ activeLabel }}</div></div>
+<div data-print-head="1" style="margin-bottom:10px"><div style="font-size:17px;font-weight:700">{{ companyName }} — {{ repTitle }}</div><div style="font-size:12px;color:var(--color-neutral-700);margin-top:2px">{{ activeLabel }}</div></div>
 <div data-print-open="1" style="overflow-x:auto;border:1px solid var(--color-accent-300);border-top:0"><div style="min-width:900px">
-<div style="display:grid;grid-template-columns:92px minmax(0,1.6fr) minmax(0,1.1fr) minmax(0,1.1fr) minmax(0,1.1fr) 96px 88px 92px 92px 34px;column-gap:12px;padding:10px 14px;background:var(--color-accent-100);border-bottom:1px solid var(--color-accent-300);font-size:10.5px;font-weight:700;color:var(--color-accent-900);letter-spacing:0.05em"><span>التاريخ</span><span>البيان</span><span>المورد</span><span>البند</span><span>مركز التكلفة</span><span style="text-align:left">الإجمالي</span><span style="text-align:left">الضريبة</span><span>الفاتورة</span><span>التسوية</span><span></span></div>
+<div style="display:grid;grid-template-columns:92px minmax(0,1.6fr) minmax(0,1.1fr) minmax(0,1.1fr) minmax(0,1.1fr) 96px 88px 92px 92px 34px;column-gap:12px;padding:10px 14px;background:var(--color-accent-100);border-bottom:1px solid var(--color-accent-300);font-size:10.5px;font-weight:700;color:var(--color-accent-900);letter-spacing:0.05em"><span>التاريخ</span><span>البيان</span><span>{{ vendorLabel }}</span><span>البند</span><span>مركز التكلفة</span><span style="text-align:left">الإجمالي</span><span style="text-align:left">الضريبة</span><span>الفاتورة</span><span>التسوية</span><span></span></div>
 <sc-for list="{{ repRows }}" as="r" hint-placeholder-count="6"><div onClick="{{ r.open }}" style="display:grid;grid-template-columns:92px minmax(0,1.6fr) minmax(0,1.1fr) minmax(0,1.1fr) minmax(0,1.1fr) 96px 88px 92px 92px 34px;column-gap:12px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--color-divider);font-size:12.5px;font-variant-numeric:tabular-nums;cursor:pointer" style-hover="background:var(--color-accent-100)"><span style="color:var(--color-neutral-800)">{{ r.date }}</span><span style="font-weight:700;min-width:0;overflow-wrap:anywhere">{{ r.desc }}</span><span style="min-width:0;overflow-wrap:anywhere">{{ r.vendor }}</span><span style="min-width:0;overflow-wrap:anywhere">{{ r.item }}</span><span style="min-width:0;overflow-wrap:anywhere">{{ r.cc }}</span><span style="text-align:left;font-weight:700">{{ r.amount }}</span><span style="text-align:left;color:var(--color-neutral-800)">{{ r.vat }}</span><span><sc-if value="{{ r.isTax }}" hint-placeholder-val="{{ true }}"><span style="display:inline-block;font-size:10.5px;font-weight:700;border:1px solid var(--color-accent-700);color:var(--color-accent-900);background:var(--color-accent-100);padding:2px 7px;white-space:nowrap">ضريبية</span></sc-if><sc-if value="{{ r.noTax }}"><span style="display:inline-block;font-size:10.5px;font-weight:600;border:1px solid var(--color-divider);color:var(--color-neutral-800);padding:2px 7px;white-space:nowrap">بدون</span></sc-if></span><span style="font-size:10.5px;font-weight:600;color:var(--color-neutral-800);white-space:nowrap">{{ r.settle }}</span><span onClick="{{ r.reviewStop }}"><sc-if value="{{ r.canReview }}"><sc-if value="{{ r.reviewed }}"><button type="button" onClick="{{ r.toggleReview }}" title="تمت المراجعة" style="width:22px;height:22px;border:1px solid var(--color-accent);background:var(--color-accent);color:#ffffff;font-size:12px;font-weight:700;cursor:pointer;line-height:1">✓</button></sc-if><sc-if value="{{ r.notReviewed }}"><button type="button" onClick="{{ r.toggleReview }}" title="علّم كمُراجَع" style="width:22px;height:22px;border:1px solid var(--color-divider);background:#ffffff;color:transparent;cursor:pointer">.</button></sc-if></sc-if></span></div></sc-for>
 <div style="display:grid;grid-template-columns:92px minmax(0,1.6fr) minmax(0,1.1fr) minmax(0,1.1fr) minmax(0,1.1fr) 96px 88px 92px 92px 34px;column-gap:12px;align-items:center;padding:13px 14px;background:var(--color-accent-700);color:#ffffff;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums"><span>الإجمالي</span><span>{{ repCount }}</span><span></span><span></span><span></span><span style="text-align:left">{{ repTotal }}</span><span style="text-align:left">{{ repVat }}</span><span></span><span></span><span></span></div>
 </div></div>
@@ -240,7 +243,7 @@ body[data-theme="dark"]{background:#121614;color:#e9ece9}
 <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 16px;background:var(--color-accent-700)">
 <span style="font-size:13px;font-weight:700;color:#ffffff;min-width:0;overflow-wrap:anywhere">{{ viewerName }}</span>
 <span style="display:flex;gap:8px">
-<button type="button" onClick="{{ viewerDownload }}" style="border:1px solid rgba(255,255,255,0.55);background:transparent;color:#ffffff;font-size:12px;font-weight:700;padding:7px 13px;cursor:pointer">تنزيل</button>
+<button type="button" onClick="{{ viewerTab }}" style="border:1px solid rgba(255,255,255,0.55);background:transparent;color:#ffffff;font-size:12px;font-weight:700;padding:7px 13px;cursor:pointer">فتح في نافذة</button><button type="button" onClick="{{ viewerDownload }}" style="border:1px solid rgba(255,255,255,0.55);background:transparent;color:#ffffff;font-size:12px;font-weight:700;padding:7px 13px;cursor:pointer">تنزيل</button>
 <button type="button" onClick="{{ closeViewer }}" style="border:1px solid #ffffff;background:#ffffff;color:var(--color-accent-900);font-size:12px;font-weight:700;padding:7px 15px;cursor:pointer">إغلاق</button>
 </span></div>
 <sc-if value="{{ viewerMany }}"><div style="display:flex;gap:6px;flex-wrap:wrap;padding:9px 16px;background:var(--color-accent-900)">
@@ -258,7 +261,7 @@ body[data-theme="dark"]{background:#121614;color:#e9ece9}
 </div>
 <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px">
 <sc-if value="{{ hasFile }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ openFile }}" style="border:1px solid var(--color-accent);background:transparent;color:var(--color-accent-900);font-size:12.5px;font-weight:700;padding:8px 14px;cursor:pointer" style-hover="background:var(--color-accent-100)">عرض المرفق — {{ detailFileName }}</button></sc-if>
-<sc-if value="{{ noFile }}"><span style="font-size:12px;color:var(--color-neutral-700);font-weight:600">لا يوجد مرفق لهذا المصروف</span></sc-if>
+<sc-if value="{{ noFile }}"><span style="font-size:12px;color:var(--color-neutral-700);font-weight:600">لا يوجد مرفق لهذا المصروف</span></sc-if><sc-if value="{{ mayEditExp }}"><button type="button" onClick="{{ editExp }}" style="border:1px solid var(--color-accent);background:var(--color-accent);color:#ffffff;font-size:12.5px;font-weight:700;padding:8px 14px;cursor:pointer">تعديل المصروف</button></sc-if>
 <sc-if value="{{ mayEditFile }}"><label style="display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:600;color:var(--color-neutral-700);border:1px solid var(--color-divider);padding:6px 10px;cursor:pointer">استبدال المرفق<input type="file" onChange="{{ pickFile }}" style="max-width:150px;font-size:11px;color:var(--color-text)"></label></sc-if>
 </div>
 <sc-if value="{{ hasDetailLines }}"><div style="margin-top:18px">
@@ -310,7 +313,7 @@ class Component extends DCLogic {
     const banks = (p.bankAccounts || 'بنك الراجحى مؤسسة سعد, بنك الأهلى مؤسسة سعد, حساب هلا مؤسسة سعد').split(',').map(s=>s.trim()).filter(Boolean);
     const hrCC = (p.hrCostCenters || 'مؤسسة الحمد, جوفال, المصنع, فرع الرياض, فرع جدة, فرع الدمام, فرع المدينة, فرع تبوك, المنتجات, مشاريع الزيتون, مشروع 24').split(',').map(s=>s.trim()).filter(Boolean);
     this.state = Object.assign({
-      page:'dash', q:'', filter:'', modal:null, form:{}, editId:null, err:'',
+      page:'dash', q:'', filter:'', ef:{stat:'غير مسواة'}, modal:null, form:{}, editId:null, err:'',
       cc, items, hrItems, hrCC, banks,
       employees:[
         {id:1,name:'قويدر صالح احمد هادي دهول',cc:'المستودع الرئيسى',job:'مندوب مشتريات',status:'نشط',itemsKey:'default'},
@@ -414,7 +417,7 @@ class Component extends DCLogic {
     return out;
   }
   load(){ try { const r = localStorage.getItem(this.KEY); return r ? JSON.parse(r) : {}; } catch(e){ return {}; } }
-  persist(){ try { const s=this.state; localStorage.setItem(this.KEY, JSON.stringify({employees:s.employees,custodies:s.custodies,expenses:s.expenses,users:s.users,auth:s.auth,deleted:s.deleted})); } catch(e){} }
+  persist(){ try { const s=this.state; localStorage.setItem(this.KEY, JSON.stringify({employees:s.employees,custodies:s.custodies,expenses:s.expenses,users:s.users,transfers:s.transfers||[],bankExpenses:s.bankExpenses||[],auth:s.auth,deleted:s.deleted})); } catch(e){} }
   themeNow(){ return this.state.theme || (this.props.theme==='غامق' ? 'dark' : 'light'); }
   componentDidMount(){
     if(this._migrated && this.cloudOn()) this._dirty = true;
@@ -440,7 +443,7 @@ class Component extends DCLogic {
     window.addEventListener('storage', this._sync);
     if(this.cloudOn()){
       this.cloudPull();
-      this._poll = setInterval(()=>this.cloudPull(), 10000);
+      this._poll = setInterval(()=>this.cloudPull(), 6000);
       setTimeout(()=>this.cloudPull(), 1200);
       this._focus = () => { if(!document.hidden){ if(this._dirty) this.cloudPush(); else this.cloudPull(); } };
       this._beforeUnload = e => { if(this._dirty){ this.cloudPush(); e.preventDefault(); e.returnValue = ''; return ''; } };
@@ -485,66 +488,114 @@ class Component extends DCLogic {
     return fetch(url, Object.assign({}, opts, {signal:ac.signal})).finally(()=>clearTimeout(t));
   }
   cloudHeaders(){ const c=this.cloudCfg(); return {apikey:c.key, Authorization:'Bearer '+c.key, 'Content-Type':'application/json', Prefer:'resolution=merge-duplicates,return=representation'}; }
+  cloudBase(){ return String(this.cloudCfg().url||'').replace(/\/$/,'')+'/rest/v1/'; }
+  sentMap(){ try { return JSON.parse(localStorage.getItem(this.KEY+'-sent')||'{}'); } catch(e){ return {}; } }
+  saveSent(m){ try { localStorage.setItem(this.KEY+'-sent', JSON.stringify(m)); } catch(e){} }
+  pendingRows(sent){
+    const rows = [], s = this.state, t = this.tombs();
+    ['employees','custodies','expenses','users','transfers','bankExpenses'].forEach(k=>{
+      (s[k]||[]).forEach(x=>{ if(!x || x.id===undefined || x.id===null) return; const key=k+':'+x.id, v=Number(x._ts)||0; if(sent[key]===-1) return; if(sent[key]===undefined || v>sent[key]) rows.push({coll:k,id:x.id,data:x,deleted:false,key:key,v:v}); });
+      (t[k]||[]).forEach(id=>{ const key=k+':'+id; if(sent[key]!==-1) rows.push({coll:k,id:id,data:{},deleted:true,key:key,v:-1}); });
+    });
+    return rows;
+  }
   async cloudPull(){
     if(!this.cloudOn()) return true;
+    if(this._pullP) return this._pullP;
+    this._pullP = this._doPull().finally(()=>{ this._pullP = null; });
+    return this._pullP;
+  }
+  async _doPull(){
+    const COL = ['employees','custodies','expenses','users','transfers','bankExpenses'];
     try {
-      const r = await this.fetchT(this.cloudUrl()+'&select=data,updated_at',{headers:this.cloudHeaders()}, 9000);
-      if(!r.ok) throw new Error('HTTP '+r.status+' — '+(await r.text()).slice(0,180));
-      const j = await r.json();
-      const row = j && j[0];
-      if(row && row.data && !Array.isArray(row.data.custodies)){ this.setState({cloudMsg:'السحابة فارغة — اضغط «رفع البيانات للسحابة» من جهاز المحاسب'}); return true; }
-      if(row && row.data && row.updated_at !== this._cloudAt){
-        this._cloudAt = row.updated_at;
-        const d = row.data, s = this.state;
-        const dead = this.saveTombs(this.mergeDeleted(this.tombs(), d.deleted));
-        const merged = {
-          employees: this.mergeArr(s.employees, d.employees, dead.employees),
-          custodies: this.mergeArr(s.custodies, d.custodies, dead.custodies),
-          expenses:  this.mergeArr(s.expenses,  d.expenses,  dead.expenses),
-          users:     this.mergeArr(s.users,     d.users,     dead.users),
-          transfers: this.mergeArr(s.transfers, d.transfers, dead.transfers),
-          bankExpenses: this.mergeArr(s.bankExpenses, d.bankExpenses, dead.bankExpenses)
-        };
-        const mg = this.migrate(merged);
-        const kill2 = (arr,ids)=>{ const k={}; (ids||[]).forEach(i=>{k[i]=1;}); return arr.filter(x=>!k[x.id]); };
-        merged.employees = kill2(mg.employees, dead.employees); merged.custodies = kill2(mg.custodies, dead.custodies); merged.users = kill2(mg.users, dead.users);
-        const cloudHasDead = ['employees','custodies','expenses','users','transfers','bankExpenses'].some(k=>
-          (d[k]||[]).some(x=>(dead[k]||[]).indexOf(x.id)>=0));
-        const sameAsCloud = !mg.changed && !cloudHasDead && ['employees','custodies','expenses','users','transfers','bankExpenses'].every(k=>
-          JSON.stringify(merged[k]) === JSON.stringify(d[k]||[]));
-        this._skipPush = true;
-        this.setState({employees:merged.employees,custodies:merged.custodies,expenses:merged.expenses,users:merged.users,transfers:merged.transfers,bankExpenses:merged.bankExpenses,deleted:dead,
-          cloudMsg:'متزامن · '+new Date().toLocaleTimeString('en-GB')});
-        if(!sameAsCloud || this._dirty){ this._dirty = true; clearTimeout(this._pushT); this._pushT = setTimeout(()=>this.cloudPush(), 300); }
-      } else if(row) {
-        if(this._dirty){ this.cloudPush(); return true; }
-        this.setState({cloudMsg:'متزامن · '+new Date().toLocaleTimeString('en-GB')});
+      let cur = null; try { cur = localStorage.getItem(this.KEY+'-cur'); } catch(e){}
+      if(!(this.state.custodies||[]).length) cur = null;
+      const q = this.cloudBase()+'records?select=coll,id,data,deleted,updated_at&order=updated_at.asc,coll.asc,id.asc&limit=500'+(cur?'&updated_at=gte.'+encodeURIComponent(cur):'');
+      let all = [];
+      for(let g=0; g<80; g++){
+        const r = await this.fetchT(q+'&offset='+all.length, {headers:this.cloudHeaders()}, 20000);
+        if(!r.ok) throw new Error('HTTP '+r.status+' — '+(await r.text()).slice(0,180));
+        const rows = await r.json(); all = all.concat(rows);
+        if(rows.length < 500) break;
       }
+      let legacy = null;
+      if(!cur && !all.length){
+        try { const r2 = await this.fetchT(this.cloudBase()+'app_state?id=eq.1&select=data', {headers:this.cloudHeaders()}, 20000);
+          if(r2.ok){ const j2 = await r2.json(); if(j2[0] && j2[0].data && Array.isArray(j2[0].data.custodies)) legacy = j2[0].data; } } catch(e){}
+      }
+      const s = this.state, sent = this.sentMap(), tomb = this.tombs(), next = {}; let changed = false, maxAt = cur;
+      COL.forEach(k=>{ next[k] = (s[k]||[]).slice(); tomb[k] = tomb[k]||[]; });
+      const put = (k, rd, key) => {
+        const i = next[k].findIndex(x=>String(x.id)===String(rd.id)), rt = Number(rd._ts)||0;
+        if(i<0){ if(tomb[k].indexOf(Number(rd.id))>=0) return; next[k].push(rd); sent[key]=rt; changed=true; }
+        else { const lt = Number(next[k][i]._ts)||0; if(rt>lt){ next[k][i]=rd; sent[key]=rt; changed=true; } else sent[key]=rt; }
+      };
+      all.forEach(r=>{
+        if(!next[r.coll]) return; const k = r.coll, key = k+':'+r.id;
+        if(!maxAt || r.updated_at > maxAt) maxAt = r.updated_at;
+        if(r.deleted){
+          if(tomb[k].indexOf(Number(r.id))<0) tomb[k].push(Number(r.id)); sent[key] = -1;
+          const n = next[k].filter(x=>String(x.id)!==String(r.id)); if(n.length!==next[k].length){ next[k]=n; changed=true; }
+        } else if(r.data && r.data.id!==undefined) put(k, r.data, key);
+      });
+      if(legacy){
+        COL.forEach(k=>{
+          ((legacy.deleted||{})[k]||[]).forEach(id=>{ if(tomb[k].indexOf(Number(id))<0) tomb[k].push(Number(id)); });
+          next[k] = next[k].filter(x=>tomb[k].indexOf(Number(x.id))<0);
+          (legacy[k]||[]).forEach(rd=>{ if(rd && rd.id!==undefined){ put(k, rd, k+':'+rd.id); delete sent[k+':'+rd.id]; } });
+        });
+        changed = true;
+      }
+      const mg = this.migrate({employees:next.employees,users:next.users,custodies:next.custodies});
+      if(mg.changed){ next.employees=mg.employees; next.users=mg.users; next.custodies=mg.custodies; changed=true; }
+      this.saveTombs(tomb); this.saveSent(sent);
+      if(maxAt){ try { localStorage.setItem(this.KEY+'-cur', maxAt); } catch(e){} }
+      this._pulled = true;
+      const msg = 'متزامن · '+new Date().toLocaleTimeString('en-GB');
+      if(changed){ this._skipPush = true; this.setState({employees:next.employees,custodies:next.custodies,expenses:next.expenses,users:next.users,transfers:next.transfers,bankExpenses:next.bankExpenses,deleted:tomb,cloudMsg:msg}); }
+      else this.setState({cloudMsg:msg});
+      setTimeout(()=>{ if(this.pendingRows(this.sentMap()).length){ this._dirty = true; this.cloudPush(); } }, 400);
       return true;
     } catch(e){ this.setState({cloudMsg:'تعذر الاتصال بالسحابة: '+e.message}); return false; }
   }
   async cloudPush(){
     if(!this.cloudOn()) return;
-    const s = this.state;
     if(!navigator.onLine){ this._dirty = true; this.setState({cloudMsg:'لا يوجد اتصال — التعديلات محفوظة وستُرفع تلقائياً'}); return; }
-    const body = [{id:1, data:this.dataOut(), updated_at:new Date().toISOString()}];
+    if(this._pushing){ this._again = true; return; }
+    this._pushing = true;
     try {
-      const c = this.cloudCfg();
-      const r = await this.fetchT(String(c.url||'').replace(/\/$/,'')+'/rest/v1/app_state?on_conflict=id',{method:'POST',headers:this.cloudHeaders(),body:JSON.stringify(body)}, 12000);
-      if(!r.ok) throw new Error('HTTP '+r.status+' — '+(await r.text()).slice(0,180));
-      const j = await r.json(); if(j && j[0]) this._cloudAt = j[0].updated_at;
-      this._dirty = false;
-      this.setState({cloudMsg:'تم الحفظ في السحابة · '+new Date().toLocaleTimeString('en-GB')});
+      if(!this._pulled){ const ok = await this.cloudPull(); if(!ok) throw new Error('تعذر السحب قبل الرفع'); }
+      do {
+        this._again = false;
+        const rows = this.pendingRows(this.sentMap());
+        for(let i=0; i<rows.length; i+=10){
+          const ch = rows.slice(i, i+10);
+          const r = await this.fetchT(this.cloudBase()+'records?on_conflict=coll,id', {method:'POST', headers:Object.assign(this.cloudHeaders(),{Prefer:'resolution=merge-duplicates,return=minimal'}), body:JSON.stringify(ch.map(x=>({coll:x.coll,id:x.id,data:x.data,deleted:x.deleted})))}, 25000);
+          if(!r.ok) throw new Error('HTTP '+r.status+' — '+(await r.text()).slice(0,180));
+          const m = this.sentMap(); ch.forEach(x=>{ m[x.key]=x.v; }); this.saveSent(m);
+        }
+      } while(this._again);
+      const left = this.pendingRows(this.sentMap()).length;
+      this._dirty = left>0;
+      this.setState({cloudMsg: left ? 'جاري الحفظ…' : 'تم الحفظ في السحابة · '+new Date().toLocaleTimeString('en-GB')});
+      if(left){ clearTimeout(this._retryT); this._retryT = setTimeout(()=>this.cloudPush(), 500); }
     } catch(e){
       this._dirty = true;
       this.setState({cloudMsg:'فشل الحفظ في السحابة — سيُعاد المحاولة: '+e.message});
       clearTimeout(this._retryT); this._retryT = setTimeout(()=>this.cloudPush(), 5000);
-    }
+    } finally { this._pushing = false; }
+  }
+  blobUrl(u){
+    u = String(u||''); if(!/^data:/.test(u) || /^data:image\//.test(u)) return u;
+    this._bc = this._bc || {}; if(this._bc[u]) return this._bc[u];
+    try { const i=u.indexOf(','), mime=(u.slice(5,i).split(';')[0])||'application/octet-stream', bin=atob(u.slice(i+1)), a=new Uint8Array(bin.length);
+      for(let k=0;k<bin.length;k++) a[k]=bin.charCodeAt(k);
+      return this._bc[u] = URL.createObjectURL(new Blob([a],{type:mime})); } catch(e){ return u; }
   }
   exportData(){
     const s = this.state;
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([JSON.stringify({employees:s.employees,custodies:s.custodies,expenses:s.expenses,transfers:s.transfers||[],users:s.users},null,1)],{type:'application/json'}));
+    a.href = URL.createObjectURL(new Blob([JSON.stringify({employees:s.employees,custodies:s.custodies,expenses:s.expenses,transfers:s.transfers||[],bankExpenses:s.bankExpenses||[],users:s.users},null,1)],{type:'application/json'}));
     a.download = 'بيانات العهد '+new Date().toISOString().slice(0,10)+'.json';
     a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 20000);
   }
@@ -555,7 +606,7 @@ class Component extends DCLogic {
       const d = JSON.parse(String(fr.result));
       if(!d.custodies || !d.expenses) throw new Error('bad');
       if(!confirm('سيُستبدل السجل الحالي بالبيانات المستوردة. متابعة؟')) return;
-      this.setState({employees:d.employees||[],custodies:d.custodies,expenses:d.expenses,transfers:d.transfers||[],users:d.users||this.state.users});
+      this.setState({employees:d.employees||[],custodies:d.custodies,expenses:d.expenses,transfers:d.transfers||[],bankExpenses:d.bankExpenses||[],users:d.users||this.state.users});
     } catch(e){ alert('الملف غير صالح'); } };
     fr.readAsText(f);
   }
@@ -923,6 +974,10 @@ class Component extends DCLogic {
   }
   bar(pct){ return React.createElement('span',{style:{display:'block',height:'3px',background:'var(--color-neutral-300)',position:'relative'}},
     React.createElement('span',{style:{position:'absolute',insetInlineStart:0,top:0,bottom:0,width:Math.max(0,Math.min(100,pct))+'%',background:'var(--color-accent)'}})); }
+  selReq(value, options, onChange){
+    return React.createElement('select',{value:value||'all',onChange,style:{width:'100%',minWidth:0,border:'1px solid var(--color-accent-300)',background:'#ffffff',padding:'9px 11px',fontSize:'13px',color:'var(--color-text)',fontFamily:'inherit'}},
+      options.map(o=>React.createElement('option',{key:String(o.v),value:o.v},o.t)));
+  }
   sel(value, options, onChange, empty){
     const none = options.length===0 && empty;
     return React.createElement('select',{value:value||'',onChange,disabled:!!none,style:{width:'100%',minWidth:0,border:'1px solid var(--color-accent-300)',background:none?'var(--color-accent-100)':'#ffffff',padding:'9px 11px',fontSize:'13px',color:none?'var(--color-accent-900)':'var(--color-text)',fontFamily:'inherit'}},
@@ -1005,8 +1060,18 @@ class Component extends DCLogic {
     if(f){
       if(c==='employees'||c==='users') rows = rows.filter(o=>o.status===f);
       if(c==='custodies') rows = rows.filter(o=>o.status===f);
-      if(c==='expenses') rows = rows.filter(o=>o.cc===f);
       if(c==='bankExpenses') rows = rows.filter(o=>o.bank===f);
+    }
+    if(c==='expenses'){
+      const ef = st.ef || {}, cb = {}; st.custodies.forEach(x=>{ cb[x.id]=x; });
+      const isSet = o => { const cu = cb[Number(o.cus)]; return !!(cu && cu.status==='مسواة'); };
+      rows = rows.filter(o=>
+        (!ef.stat || ef.stat==='all' || (ef.stat==='مسواة' ? isSet(o) : !isSet(o))) &&
+        (!ef.cus || Number(o.cus)===Number(ef.cus)) &&
+        (!ef.cc || this.shares(o).some(s=>s.cc===ef.cc)) &&
+        (!ef.item || o.item===ef.item) &&
+        (!ef.from || String(o.date||'')>=ef.from) &&
+        (!ef.to || String(o.date||'')<=ef.to));
     }
     return rows;
   }
@@ -1177,22 +1242,24 @@ class Component extends DCLogic {
     });
     const rf = st.rf || {};
     const cusById = {}; st.custodies.forEach(c=>{cusById[c.id]=c;});
-    const settleOf = e => { const c=cusById[Number(e.cus)]; if(!c) return 'غير مرتبط'; if(c.status==='مسواة') return 'مسواة'; return spent(c.id) > 0 ? 'جزئية' : 'غير مسواة'; };
+    const settleOf = e => { if(e.bank) return 'بنكي'; const c=cusById[Number(e.cus)]; if(!c) return 'غير مرتبط'; if(c.status==='مسواة') return 'مسواة'; return spent(c.id) > 0 ? 'جزئية' : 'غير مسواة'; };
     const invoiceOf = e => e.taxable==='نعم' ? 'ضريبية' : 'بدون';
-    const months = Array.from(new Set(st.expenses.map(e=>String(e.date||'').slice(0,7)))).filter(m=>/^\d{4}-\d{2}$/.test(m)).sort().reverse();
+    const bnk = rf.src==='bnk'; const repBase = bnk ? st.bankExpenses : st.expenses;
+    const months = Array.from(new Set(repBase.map(e=>String(e.date||'').slice(0,7)))).filter(m=>/^\d{4}-\d{2}$/.test(m)).sort().reverse();
     const monthName = m => { const n=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر']; const p=m.split('-'); return n[Number(p[1])-1]+' '+p[0]; };
     const rq = String(rf.q||'').trim();
     const hit = e => !rq || ['desc','vendor','item','cc'].some(k=>String(e[k]||'').indexOf(rq)>-1) || String(e.amount||'').indexOf(rq)>-1;
-    const repList = st.expenses.filter(e=>
-      (!rf.settle || settleOf(e)===rf.settle) &&
+    const repList = repBase.filter(e=>
+      (!bnk || !rf.bank || e.bank===rf.bank) &&
+      (bnk || !rf.settle || settleOf(e)===rf.settle) &&
       (!rf.item || e.item===rf.item) &&
       (!rf.invoice || invoiceOf(e)===rf.invoice) &&
       (!rf.cc || this.shares(e).some(s=>s.cc===rf.cc)) &&
       (!rf.month || String(e.date).slice(0,7)===rf.month) &&
       (!rf.from || String(e.date||'') >= rf.from) &&
       (!rf.to || String(e.date||'') <= rf.to) &&
-      (!rf.cus || Number(e.cus)===Number(rf.cus)) &&
-      (!rf.type || (cusById[Number(e.cus)] ? (cusById[Number(e.cus)].type||'نقدية') : '')===rf.type) && hit(e)
+      (bnk || !rf.cus || Number(e.cus)===Number(rf.cus)) &&
+      (bnk || !rf.type || (cusById[Number(e.cus)] ? (cusById[Number(e.cus)].type||'نقدية') : '')===rf.type) && hit(e)
     ).sort((a,b)=> rf.sort==='المبلغ الأعلى' ? (Number(b.amount)||0)-(Number(a.amount)||0)
       : rf.sort==='المبلغ الأقل' ? (Number(a.amount)||0)-(Number(b.amount)||0)
       : rf.sort==='الأحدث' ? String(b.date||'').localeCompare(String(a.date||''))
@@ -1211,6 +1278,10 @@ class Component extends DCLogic {
     if(rq) activeBits.push('بحث: '+rq);
     if(rf.cus) activeBits.push('العهدة: '+(cusById[Number(rf.cus)] ? this.cusLabel(cusById[Number(rf.cus)]) : rf.cus));
     if(rf.type) activeBits.push('نوع العهدة: '+rf.type);
+    if(bnk) activeBits.push('المصدر: المصروفات البنكية');
+    if(bnk && rf.bank) activeBits.push('البنك: '+rf.bank);
+    const vendorLb = bnk?'البنك':'المورد';
+    const repTitle = bnk ? 'تقرير المصروفات البنكية' : 'تقرير العهد والمصروفات';
     const ccTot={}, ccCnt={};
     st.cc.forEach(n=>{ccTot[n]=0;ccCnt[n]=0;});
     st.expenses.forEach(e=>this.shares(e).forEach(s=>{ if(ccTot[s.cc]===undefined){ccTot[s.cc]=0;ccCnt[s.cc]=0;} ccTot[s.cc]+=s.amount; ccCnt[s.cc]++; }));
@@ -1251,6 +1322,13 @@ class Component extends DCLogic {
         ];
         dt.fileUrl = (e.file&&e.file.url)?e.file.url:'';
         dt.fileName = (e.file&&e.file.name)?e.file.name:'';
+      }
+    } else if(d && d.t==='bnk'){
+      const b = st.bankExpenses.find(x=>x.id===d.id);
+      if(b){
+        dt.title = b.desc || 'مصروف بنكي'; dt.sub = (b.date||'—')+'  ·  '+(b.bank||'—');
+        dt.facts = [{k:'الإجمالي شامل الضريبة',v:m(b.amount)},{k:'الضريبة',v:m(this.vat(b))},{k:'البنك/الحساب',v:b.bank||'—'},{k:'البند',v:b.item||'—'},{k:'مركز التكلفة',v:b.cc||'—'},{k:'مرفق الفاتورة',v:(b.file&&b.file.name)?b.file.name:'لا يوجد'}];
+        dt.fileUrl = (b.file&&b.file.url)?b.file.url:''; dt.fileName = (b.file&&b.file.name)?b.file.name:'';
       }
     } else if(d && d.t==='cc'){
       const lines = st.expenses.filter(x=>this.shares(x).some(s=>s.cc===d.name)).sort((a,b)=>String(a.date).localeCompare(String(b.date)))
@@ -1367,11 +1445,13 @@ class Component extends DCLogic {
       return [['الاسم','الدور','الحالة']].concat(list.map(o=>[o.name,o.role,o.status]));
     };
     const vals = {
+      printList: ()=>this.printDoc((this.props.companyName||'موسسة سعد عبد العزيز الحمد')+' — سجل '+(def?def.title:''), 'عدد السجلات: '+list.length, exportRows(), pm.directPdf),
       theme: this.themeNow(),
       themeLabel: this.themeNow()==='dark' ? 'مظهر فاتح' : 'مظهر غامق',
       toggleTheme: ()=>{ const t = this.themeNow()==='dark' ? 'light' : 'dark'; try{ localStorage.setItem('custody-app-theme', t); }catch(e){} this.setState({theme:t}); },
       companyName: this.props.companyName || 'موسسة سعد عبد العزيز الحمد',
       role: (st.auth && st.auth.role) || this.props.role || 'المحاسب',
+      fSrc: this.sel(rf.src, [{v:'bnk',t:'المصروفات البنكية'}], e=>setRf('src',e.target.value), 'مصروفات العهد'), fBank: this.sel(rf.bank, st.banks.map(v=>({v,t:v})), e=>setRf('bank',e.target.value)), vendorLabel: bnk?'البنك':'المورد', repTitle: repTitle,
       fSettle: this.sel(rf.settle, ['مسواة','جزئية','غير مسواة','غير مرتبط'].map(v=>({v,t:v})), e=>setRf('settle',e.target.value)),
       fItem: this.sel(rf.item, (mine ? this.itemsFor(mine) : this.allItems()).map(v=>({v,t:v})), e=>setRf('item',e.target.value)),
       fInvoice: this.sel(rf.invoice, [{v:'ضريبية',t:'فاتورة ضريبية فقط'},{v:'بدون',t:'بدون فاتورة ضريبية'}], e=>setRf('invoice',e.target.value)),
@@ -1393,35 +1473,37 @@ class Component extends DCLogic {
         {label:'عدد العمليات',value:String(repList.length),solid:false,plain:true},
         {label:'الصافي قبل الضريبة',value:this.fmt(repTotal-repVatSum),solid:false,plain:true}
       ],
-      repRows: repList.map(e=>({date:e.date,desc:e.desc,vendor:e.vendor,item:e.item,cc:e.cc,amount:this.fmt(e.amount),vat:this.fmt(this.vat(e)),invoice:invoiceOf(e),isTax:e.taxable==='نعم',noTax:e.taxable!=='نعم',settle:settleOf(e),
-        open:()=>this.setState({detail:{t:'exp',id:e.id}})})),
+      repRows: repList.map(e=>({date:e.date,desc:e.desc,vendor:(bnk?e.bank:e.vendor),item:e.item,cc:e.cc,amount:this.fmt(e.amount),vat:this.fmt(this.vat(e)),invoice:invoiceOf(e),isTax:e.taxable==='نعم',noTax:e.taxable!=='نعم',settle:settleOf(e),
+        open:()=>this.setState({detail:{t:bnk?'bnk':'exp',id:e.id}})})),
       detailOpen: !!st.detail, detailTitle: dt.title, detailSub: dt.sub, detailFacts: dt.facts,
       detailLines: dt.lines, hasDetailLines: dt.lines.length>0, detailFoot: dt.foot, hasDetailFoot: !!dt.foot,
       closeDetail: ()=>this.setState({detail:null}),
-      viewerOpen: !!st.viewer, viewerName: st.viewer ? st.viewer.name : '', viewerUrl: st.viewer ? st.viewer.url : '',
+      viewerOpen: !!st.viewer, viewerName: st.viewer ? st.viewer.name : '', viewerUrl: st.viewer ? this.blobUrl(st.viewer.url) : '',
       viewerIsImg: !!(st.viewer && /^data:image\//.test(String(st.viewer.url||''))),
       viewerIsDoc: !!(st.viewer && !/^data:image\//.test(String(st.viewer.url||''))),
       viewerMany: !!(st.viewer && st.viewer.list && st.viewer.list.length>1),
       viewerList: (st.viewer && st.viewer.list ? st.viewer.list : []).map((x,i)=>({label:'مستند '+(i+1), go:()=>this.setState(s=>({viewer:Object.assign({},s.viewer,{name:x.name,url:x.url})}))})),
-      viewerDownload: ()=>{ if(!st.viewer) return; const a=document.createElement('a'); a.href=st.viewer.url; a.download=st.viewer.name||'مستند'; a.click(); },
+      viewerTab: ()=>{ if(st.viewer) window.open(this.blobUrl(st.viewer.url),'_blank'); }, viewerDownload: ()=>{ if(!st.viewer) return; const a=document.createElement('a'); a.href=st.viewer.url; a.download=st.viewer.name||'مستند'; a.click(); },
       closeViewer: ()=>this.setState({viewer:null}),
-      hasFile: !!dt.fileUrl, detailFileName: dt.fileName, noFile: !dt.fileUrl && !!(d && d.t==='exp'),
+      hasFile: !!dt.fileUrl, detailFileName: dt.fileName, noFile: !dt.fileUrl && !!(d && (d.t==='exp'||d.t==='bnk')),
       mayEditFile: !!(d && d.t==='exp' && pm.fileEdit && (()=>{ const e=st.expenses.find(x=>x.id===d.id); const cu=e&&cusById[Number(e.cus)]; return !cu || cu.status!=='مسواة'; })()),
       pickFile: e=>{ const fl=e.target.files&&e.target.files[0]; if(!fl||!d) return; const fr=new FileReader(); fr.onload=()=>this.setState(s=>({expenses:s.expenses.map(x=> x.id===d.id ? this.stamp(Object.assign({},x,{file:{name:fl.name,url:String(fr.result).length<3000000?fr.result:''}})) : x)})); fr.readAsDataURL(fl); },
+      mayEditExp: !!(d && (d.t==='exp'||d.t==='bnk') && (()=>{ if(d.t==='bnk') return !!pm.edit.bankExpenses; const e=st.expenses.find(x=>x.id===d.id); const cu=e&&cusById[Number(e.cus)]; return !!pm.edit.expenses && (!cu || cu.status!=='مسواة' || pm.approve); })()),
+      editExp: ()=>{ if(!d) return; const k=d.t==='bnk'?'bankExpenses':'expenses'; const o=(st[k]||[]).find(x=>x.id===d.id); if(o) this.setState({detail:null,modal:k,form:Object.assign({},o),editId:o.id,err:''}); },
       openFile: ()=>{ if(dt.fileUrl) this.setState({viewer:{name:dt.fileName||'مرفق الفاتورة',url:dt.fileUrl}}); },
       repCount: repList.length+' عملية', repTotal: this.fmt(repTotal), repVat: this.fmt(repVatSum),
       repEmpty: repList.length===0,
       expResults: ()=>this.excelDoc(
-        'تقرير العهد والمصروفات',
+        repTitle,
         activeBits.length ? activeBits.join('  ·  ') : 'كل العمليات — لا فلاتر مطبقة',
-        [['التاريخ','البيان','المورد','البند','مركز التكلفة','العهدة','الإجمالي','الضريبة','الفاتورة','التسوية']]
-        .concat(repList.map(e=>[e.date,e.desc,e.vendor,e.item,e.cc,(cusById[Number(e.cus)]?this.cusLabel(cusById[Number(e.cus)]):'—'),this.fmt(e.amount),this.fmt(this.vat(e)),invoiceOf(e),settleOf(e)]))
+        [['التاريخ','البيان',vendorLb,'البند','مركز التكلفة','العهدة','الإجمالي','الضريبة','الفاتورة','التسوية']]
+        .concat(repList.map(e=>[e.date,e.desc,(bnk?e.bank:e.vendor),e.item,e.cc,(bnk?'—':(cusById[Number(e.cus)]?this.cusLabel(cusById[Number(e.cus)]):'—')),this.fmt(e.amount),this.fmt(this.vat(e)),invoiceOf(e),settleOf(e)]))
         .concat([['الإجمالي','','','','','',this.fmt(repTotal),this.fmt(repVatSum),'','']])),
       printPdf: ()=>this.printDoc(
-        (this.props.companyName||'موسسة سعد عبد العزيز الحمد')+' — تقرير العهد والمصروفات',
+        (this.props.companyName||'موسسة سعد عبد العزيز الحمد')+' — '+repTitle,
         activeBits.length ? activeBits.join('  ·  ') : 'كل العمليات — لا فلاتر مطبقة',
-        [['التاريخ','البيان','المورد','البند','مركز التكلفة','الإجمالي','الضريبة','الفاتورة','التسوية']]
-          .concat(repList.map(e=>[e.date,e.desc,e.vendor,e.item,e.cc,this.fmt(e.amount),this.fmt(this.vat(e)),invoiceOf(e),settleOf(e)]))
+        [['التاريخ','البيان',vendorLb,'البند','مركز التكلفة','الإجمالي','الضريبة','الفاتورة','التسوية']]
+          .concat(repList.map(e=>[e.date,e.desc,(bnk?e.bank:e.vendor),e.item,e.cc,this.fmt(e.amount),this.fmt(this.vat(e)),invoiceOf(e),settleOf(e)]))
           .concat([['الإجمالي',repList.length+' عملية','','','',this.fmt(repTotal),this.fmt(repVatSum),'','']])),
       printSettle: ()=>this.printDoc(
         (this.props.companyName||'موسسة سعد عبد العزيز الحمد')+' — كشف تسوية العهد',
@@ -1448,7 +1530,7 @@ class Component extends DCLogic {
         ? [['exp','المصروفات'],['trf','الحوالات'],['bnk','المصروفات البنكية'],['dash','لوحة التحكم'],['cus','العهد'],['set','التسوية'],['rep','التقارير'],['emp','الموظفون'],['usr','المستخدمون']]
         : [['dash','لوحة التحكم'],['emp','الموظفون'],['cus','العهد'],['exp','المصروفات'],['trf','الحوالات'],['bnk','المصروفات البنكية'],['set','التسوية'],['rep','التقارير'],['usr','المستخدمون']]
       ).filter(n=>pm.pages.indexOf(n[0])>-1).map(n=>({
-        label:n[1], on: st.page===n[0], off: st.page!==n[0], go:()=>this.setState(s=>({page:n[0],q:'',filter:'',hist:(s.hist||[]).concat([s.page]).slice(-20)})) })),
+        label:n[1], on: st.page===n[0], off: st.page!==n[0], go:()=>this.setState(s=>({page:n[0],q:'',filter:'',ef:{stat:'غير مسواة'},hist:(s.hist||[]).concat([s.page]).slice(-20)})) })),
       canBack: !!st.viewer || !!st.modal || !!st.detail || (st.hist||[]).length>0,
       goBack: ()=>this.setState(s=>{
         if(s.viewer) return {viewer:null};
@@ -1456,7 +1538,7 @@ class Component extends DCLogic {
         if(s.detail) return {detail:null};
         const hs=(s.hist||[]).slice();
         const prev=hs.pop();
-        return prev ? {page:prev,hist:hs,q:'',filter:''} : {};
+        return prev ? {page:prev,hist:hs,q:'',filter:'',ef:{stat:'غير مسواة'}} : {};
       }),
       pageTitle: pages[st.page][0], pageKicker: pages[st.page][1],
       isDash: st.page==='dash', isRep: st.page==='rep', isTable: !!c,
@@ -1479,7 +1561,16 @@ class Component extends DCLogic {
       watchRows: setRows.filter(r=>!r.done).slice(0,5).map(r=>({id:r.id,emp:r.emp,left:r.left})),
       noWatch: setRows.filter(r=>!r.done).length===0,
       q: st.q, setQ: e=>this.setState({q:e.target.value}),
-      filterEl: c ? this.sel(st.filter, filterOpts, e=>this.setState({filter:e.target.value})) : null,
+      filterEl: (c && c!=='expenses') ? this.sel(st.filter, filterOpts, e=>this.setState({filter:e.target.value})) : null,
+      efOn: c==='expenses',
+      efStat: this.selReq((st.ef||{}).stat, [{v:'غير مسواة',t:'غير المسواة'},{v:'مسواة',t:'المسواة'},{v:'all',t:'الكل'}], e=>this.setState(s=>({ef:Object.assign({},s.ef,{stat:e.target.value,cus:''})}))),
+      efCus: this.sel((st.ef||{}).cus, st.custodies.filter(x=>(!mine || x.emp===mine) && (!(st.ef||{}).stat || (st.ef||{}).stat==='all' || (((st.ef||{}).stat==='مسواة') === (x.status==='مسواة')))).sort((a,b)=>String(a.date||'').localeCompare(String(b.date||''))).map(x=>({v:x.id,t:this.cusLabel(x)+(x.type?(' — '+x.type):'')})), e=>this.setState(s=>({ef:Object.assign({},s.ef,{cus:e.target.value})}))),
+      efCc: this.sel((st.ef||{}).cc, st.cc.map(v=>({v,t:v})), e=>this.setState(s=>({ef:Object.assign({},s.ef,{cc:e.target.value})}))),
+      efItem: this.sel((st.ef||{}).item, (mine ? this.itemsFor(mine) : this.allItems()).map(v=>({v,t:v})), e=>this.setState(s=>({ef:Object.assign({},s.ef,{item:e.target.value})}))),
+      efFrom: (st.ef||{}).from||'', setEfFrom: e=>this.setState(s=>({ef:Object.assign({},s.ef,{from:e.target.value})})),
+      efTo: (st.ef||{}).to||'', setEfTo: e=>this.setState(s=>({ef:Object.assign({},s.ef,{to:e.target.value})})),
+      efReset: ()=>this.setState({ef:{stat:'غير مسواة'},q:''}),
+      efNote: 'المعروض: '+list.length+' مصروف'+(((st.ef||{}).stat||'all')==='غير مسواة' ? ' — مصروفات العهد المسواة مخفية، اختر «المسواة» أو «الكل» لعرضها' : (((st.ef||{}).stat)==='مسواة' ? ' — مصروفات العهد المسواة فقط' : '')),
       rows, isEmpty: !!c && rows.length===0,
       countLabel: c ? rows.length+' سجل من '+st[c].length : '',
       sumLabel: sumField===null ? '' : 'الإجمالي '+this.fmt(sumField),
