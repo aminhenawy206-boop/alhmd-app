@@ -499,6 +499,16 @@ class Component extends DCLogic {
     });
     return rows;
   }
+  seenMap(){ try { return JSON.parse(localStorage.getItem(this.KEY+'-seen')||'{}'); } catch(e){ return {}; } }
+  saveSeen(m){ try { localStorage.setItem(this.KEY+'-seen', JSON.stringify(m)); } catch(e){} }
+  keepNewer(cur, next, snap){
+    const ix = {}, was = {}, out = next.slice();
+    out.forEach((x,i)=>{ ix[x.id]=i; }); snap.forEach(x=>{ was[x.id]=1; });
+    cur.forEach(x=>{ const i = ix[x.id];
+      if(i===undefined){ if(!was[x.id]) out.push(x); }
+      else if((Number(x._ts)||0) > (Number(out[i]._ts)||0)) out[i] = x; });
+    return out;
+  }
   async cloudPull(){
     if(!this.cloudOn()) return true;
     if(this._pullP) return this._pullP;
@@ -509,52 +519,76 @@ class Component extends DCLogic {
     const COL = ['employees','custodies','expenses','users','transfers','bankExpenses'];
     try {
       let cur = null; try { cur = localStorage.getItem(this.KEY+'-cur'); } catch(e){}
-      if(!(this.state.custodies||[]).length) cur = null;
-      const q = this.cloudBase()+'records?select=coll,id,data,deleted,updated_at&order=updated_at.asc,coll.asc,id.asc&limit=500'+(cur?'&updated_at=gte.'+encodeURIComponent(cur):'');
-      let all = [];
-      for(let g=0; g<80; g++){
-        const r = await this.fetchT(q+'&offset='+all.length, {headers:this.cloudHeaders()}, 20000);
+      if(!(this.state.custodies||[]).length && !(this.state.expenses||[]).length) cur = null;
+      // 1) قائمة خفيفة بما تغيّر (بدون البيانات) — ترقيم بالوقت وليس بالموضع، مع هامش 5 ثوانٍ
+      let from = cur ? new Date(new Date(cur).getTime()-5000).toISOString() : null;
+      const metaMap = {};
+      for(let g=0; g<400; g++){
+        const q = this.cloudBase()+'records?select=coll,id,deleted,updated_at&order=updated_at.asc,coll.asc,id.asc&limit=1000'+(from?'&updated_at=gte.'+encodeURIComponent(from):'');
+        const r = await this.fetchT(q, {headers:this.cloudHeaders()}, 20000);
         if(!r.ok) throw new Error('HTTP '+r.status+' — '+(await r.text()).slice(0,180));
-        const rows = await r.json(); all = all.concat(rows);
-        if(rows.length < 500) break;
+        const rows = await r.json(); rows.forEach(x=>{ metaMap[x.coll+':'+x.id] = x; });
+        if(rows.length < 1000) break;
+        const last = rows[rows.length-1].updated_at; if(last===from) break; from = last;
       }
-      let legacy = null;
-      if(!cur && !all.length){
-        try { const r2 = await this.fetchT(this.cloudBase()+'app_state?id=eq.1&select=data', {headers:this.cloudHeaders()}, 20000);
-          if(r2.ok){ const j2 = await r2.json(); if(j2[0] && j2[0].data && Array.isArray(j2[0].data.custodies)) legacy = j2[0].data; } } catch(e){}
-      }
-      const s = this.state, sent = this.sentMap(), tomb = this.tombs(), next = {}; let changed = false, maxAt = cur;
-      COL.forEach(k=>{ next[k] = (s[k]||[]).slice(); tomb[k] = tomb[k]||[]; });
-      const put = (k, rd, key) => {
-        const i = next[k].findIndex(x=>String(x.id)===String(rd.id)), rt = Number(rd._ts)||0;
-        if(i<0){ if(tomb[k].indexOf(Number(rd.id))>=0) return; next[k].push(rd); sent[key]=rt; changed=true; }
-        else { const lt = Number(next[k][i]._ts)||0; if(rt>lt){ next[k][i]=rd; sent[key]=rt; changed=true; } else sent[key]=rt; }
-      };
-      all.forEach(r=>{
-        if(!next[r.coll]) return; const k = r.coll, key = k+':'+r.id;
-        if(!maxAt || r.updated_at > maxAt) maxAt = r.updated_at;
-        if(r.deleted){
-          if(tomb[k].indexOf(Number(r.id))<0) tomb[k].push(Number(r.id)); sent[key] = -1;
-          const n = next[k].filter(x=>String(x.id)!==String(r.id)); if(n.length!==next[k].length){ next[k]=n; changed=true; }
-        } else if(r.data && r.data.id!==undefined) put(k, r.data, key);
+      const seen = this.seenMap(), need = {}, gone = []; let maxAt = cur;
+      Object.keys(metaMap).forEach(key=>{
+        const m = metaMap[key]; if(COL.indexOf(m.coll)<0) return;
+        if(!maxAt || m.updated_at > maxAt) maxAt = m.updated_at;
+        if(seen[key]===m.updated_at) return;
+        if(m.deleted) gone.push(m); else (need[m.coll] = need[m.coll]||[]).push(m.id);
       });
+      // 2) البيانات الكاملة للسجلات الجديدة/المتغيّرة فقط
+      const got = [];
+      for(const k of Object.keys(need)){
+        const ids = need[k];
+        for(let i=0; i<ids.length; i+=20){
+          const r = await this.fetchT(this.cloudBase()+'records?coll=eq.'+k+'&id=in.('+ids.slice(i,i+20).join(',')+')&select=coll,id,data,deleted,updated_at', {headers:this.cloudHeaders()}, 30000);
+          if(!r.ok) throw new Error('HTTP '+r.status+' — '+(await r.text()).slice(0,180));
+          (await r.json()).forEach(x=>got.push(x));
+        }
+      }
+      // 3) القديم: جدول app_state مرة واحدة لكل جهاز
+      let legacy = null, legacyOk = false;
+      try { if(!localStorage.getItem(this.KEY+'-legacy')){
+        const r2 = await this.fetchT(this.cloudBase()+'app_state?id=eq.1&select=data', {headers:this.cloudHeaders()}, 20000);
+        if(r2.ok){ legacyOk = true; const j2 = await r2.json(); if(j2[0] && j2[0].data && Array.isArray(j2[0].data.custodies)) legacy = j2[0].data; }
+        else if(r2.status===404) legacyOk = true;
+      } } catch(e){}
+      // 4) الدمج
+      const s = this.state, sent = this.sentMap(), tomb = this.tombs(), next = {}; let changed = false;
+      COL.forEach(k=>{ next[k] = (s[k]||[]).slice(); tomb[k] = tomb[k]||[]; });
+      const put = (k, rd, key, isLegacy) => {
+        const i = next[k].findIndex(x=>String(x.id)===String(rd.id)), rt = Number(rd._ts)||0;
+        if(i<0){ if(tomb[k].indexOf(Number(rd.id))>=0) return; next[k].push(rd); if(!isLegacy) sent[key]=rt; changed=true; }
+        else { const lt = Number(next[k][i]._ts)||0; if(rt>lt){ next[k][i]=rd; if(!isLegacy) sent[key]=rt; changed=true; } else if(!isLegacy) sent[key]=rt; }
+      };
+      const kill = (k, id, key) => { if(tomb[k].indexOf(Number(id))<0) tomb[k].push(Number(id)); sent[key] = -1;
+        const n = next[k].filter(x=>String(x.id)!==String(id)); if(n.length!==next[k].length){ next[k]=n; changed=true; } };
+      gone.forEach(m=>{ const key = m.coll+':'+m.id; kill(m.coll, m.id, key); seen[key] = m.updated_at; });
+      got.forEach(x=>{ if(COL.indexOf(x.coll)<0) return; const key = x.coll+':'+x.id;
+        if(x.deleted) kill(x.coll, x.id, key); else if(x.data && x.data.id!==undefined) put(x.coll, x.data, key, false);
+        seen[key] = x.updated_at; });
       if(legacy){
         COL.forEach(k=>{
-          ((legacy.deleted||{})[k]||[]).forEach(id=>{ if(tomb[k].indexOf(Number(id))<0) tomb[k].push(Number(id)); });
-          next[k] = next[k].filter(x=>tomb[k].indexOf(Number(x.id))<0);
-          (legacy[k]||[]).forEach(rd=>{ if(rd && rd.id!==undefined){ put(k, rd, k+':'+rd.id); delete sent[k+':'+rd.id]; } });
+          ((legacy.deleted||{})[k]||[]).forEach(id=>{ if(tomb[k].indexOf(Number(id))<0){ tomb[k].push(Number(id)); changed=true; } });
+          const n = next[k].filter(x=>tomb[k].indexOf(Number(x.id))<0); if(n.length!==next[k].length){ next[k]=n; changed=true; }
+          (legacy[k]||[]).forEach(rd=>{ if(rd && rd.id!==undefined) put(k, rd, k+':'+rd.id, true); });
         });
-        changed = true;
       }
       const mg = this.migrate({employees:next.employees,users:next.users,custodies:next.custodies});
       if(mg.changed){ next.employees=mg.employees; next.users=mg.users; next.custodies=mg.custodies; changed=true; }
-      this.saveTombs(tomb); this.saveSent(sent);
+      this.saveTombs(tomb); this.saveSent(sent); this.saveSeen(seen);
       if(maxAt){ try { localStorage.setItem(this.KEY+'-cur', maxAt); } catch(e){} }
+      if(legacyOk) this._legacyPending = true;
       this._pulled = true;
       const msg = 'متزامن · '+new Date().toLocaleTimeString('en-GB');
-      if(changed){ this._skipPush = true; this.setState({employees:next.employees,custodies:next.custodies,expenses:next.expenses,users:next.users,transfers:next.transfers,bankExpenses:next.bankExpenses,deleted:tomb,cloudMsg:msg}); }
-      else this.setState({cloudMsg:msg});
-      setTimeout(()=>{ if(this.pendingRows(this.sentMap()).length){ this._dirty = true; this.cloudPush(); } }, 400);
+      if(changed){
+        const snap = {}; COL.forEach(k=>{ snap[k] = s[k]||[]; });
+        this._skipPush = true;
+        this.setState(st=>{ const o = {cloudMsg:msg, deleted:tomb}; COL.forEach(k=>{ o[k] = this.keepNewer(st[k]||[], next[k], snap[k]); }); return o; });
+      } else this.setState({cloudMsg:msg});
+      setTimeout(()=>{ if(this.pendingRows(this.sentMap()).length || this._legacyPending){ this._dirty = true; this.cloudPush(); } }, 400);
       return true;
     } catch(e){ this.setState({cloudMsg:'تعذر الاتصال بالسحابة: '+e.message}); return false; }
   }
@@ -568,15 +602,18 @@ class Component extends DCLogic {
       do {
         this._again = false;
         const rows = this.pendingRows(this.sentMap());
-        for(let i=0; i<rows.length; i+=10){
-          const ch = rows.slice(i, i+10);
-          const r = await this.fetchT(this.cloudBase()+'records?on_conflict=coll,id', {method:'POST', headers:Object.assign(this.cloudHeaders(),{Prefer:'resolution=merge-duplicates,return=minimal'}), body:JSON.stringify(ch.map(x=>({coll:x.coll,id:x.id,data:x.data,deleted:x.deleted})))}, 25000);
+        let i = 0;
+        while(i < rows.length){
+          const ch = []; let size = 0;
+          while(i < rows.length && ch.length < 10 && (ch.length===0 || size < 1500000)){ ch.push(rows[i]); size += JSON.stringify(rows[i].data).length; i++; }
+          const r = await this.fetchT(this.cloudBase()+'records?on_conflict=coll,id', {method:'POST', headers:Object.assign(this.cloudHeaders(),{Prefer:'resolution=merge-duplicates,return=minimal'}), body:JSON.stringify(ch.map(x=>({coll:x.coll,id:x.id,data:x.data,deleted:x.deleted})))}, 40000);
           if(!r.ok) throw new Error('HTTP '+r.status+' — '+(await r.text()).slice(0,180));
           const m = this.sentMap(); ch.forEach(x=>{ m[x.key]=x.v; }); this.saveSent(m);
         }
       } while(this._again);
       const left = this.pendingRows(this.sentMap()).length;
       this._dirty = left>0;
+      if(!left && this._legacyPending){ this._legacyPending = false; try { localStorage.setItem(this.KEY+'-legacy','1'); } catch(e){} }
       this.setState({cloudMsg: left ? 'جاري الحفظ…' : 'تم الحفظ في السحابة · '+new Date().toLocaleTimeString('en-GB')});
       if(left){ clearTimeout(this._retryT); this._retryT = setTimeout(()=>this.cloudPush(), 500); }
     } catch(e){
@@ -585,12 +622,23 @@ class Component extends DCLogic {
       clearTimeout(this._retryT); this._retryT = setTimeout(()=>this.cloudPush(), 5000);
     } finally { this._pushing = false; }
   }
-  blobUrl(u){
-    u = String(u||''); if(!/^data:/.test(u) || /^data:image\//.test(u)) return u;
-    this._bc = this._bc || {}; if(this._bc[u]) return this._bc[u];
-    try { const i=u.indexOf(','), mime=(u.slice(5,i).split(';')[0])||'application/octet-stream', bin=atob(u.slice(i+1)), a=new Uint8Array(bin.length);
-      for(let k=0;k<bin.length;k++) a[k]=bin.charCodeAt(k);
-      return this._bc[u] = URL.createObjectURL(new Blob([a],{type:mime})); } catch(e){ return u; }
+  mimeOf(name){ const e = String(name||'').toLowerCase().split('.').pop(); return ({pdf:'application/pdf',jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp',bmp:'image/bmp',svg:'image/svg+xml',txt:'text/plain'})[e] || ''; }
+  isImgFile(url, name){
+    const m = ((/^data:([^;,]*)/.exec(String(url||''))||[])[1]||'').toLowerCase();
+    if(/^image\//.test(m)) return true;
+    if(!m || m==='application/octet-stream') return /^image\//.test(this.mimeOf(name));
+    return false;
+  }
+  blobUrl(u, name){
+    u = String(u||''); if(!/^data:/.test(u)) return u;
+    const i = u.indexOf(','); let mime = ((u.slice(5,i).split(';')[0])||'').toLowerCase();
+    if(/^image\//.test(mime)) return u;
+    if(!mime || mime==='application/octet-stream') mime = this.mimeOf(name) || mime || 'application/octet-stream';
+    const key = mime+'|'+u.length+'|'+u.slice(i+1,i+80)+'|'+u.slice(-60);
+    this._bc = this._bc || {}; if(this._bc[key]) return this._bc[key];
+    try { const bin = atob(u.slice(i+1)), arr = new Uint8Array(bin.length);
+      for(let k=0;k<bin.length;k++) arr[k] = bin.charCodeAt(k);
+      return this._bc[key] = URL.createObjectURL(new Blob([arr],{type:mime})); } catch(e){ return u; }
   }
   exportData(){
     const s = this.state;
@@ -1478,19 +1526,22 @@ class Component extends DCLogic {
       detailOpen: !!st.detail, detailTitle: dt.title, detailSub: dt.sub, detailFacts: dt.facts,
       detailLines: dt.lines, hasDetailLines: dt.lines.length>0, detailFoot: dt.foot, hasDetailFoot: !!dt.foot,
       closeDetail: ()=>this.setState({detail:null}),
-      viewerOpen: !!st.viewer, viewerName: st.viewer ? st.viewer.name : '', viewerUrl: st.viewer ? this.blobUrl(st.viewer.url) : '',
-      viewerIsImg: !!(st.viewer && /^data:image\//.test(String(st.viewer.url||''))),
-      viewerIsDoc: !!(st.viewer && !/^data:image\//.test(String(st.viewer.url||''))),
+      viewerOpen: !!st.viewer, viewerName: st.viewer ? st.viewer.name : '', viewerUrl: st.viewer ? this.blobUrl(st.viewer.url, st.viewer.name) : '',
+      viewerIsImg: !!(st.viewer && this.isImgFile(st.viewer.url, st.viewer.name)),
+      viewerIsDoc: !!(st.viewer && !this.isImgFile(st.viewer.url, st.viewer.name)),
       viewerMany: !!(st.viewer && st.viewer.list && st.viewer.list.length>1),
       viewerList: (st.viewer && st.viewer.list ? st.viewer.list : []).map((x,i)=>({label:'مستند '+(i+1), go:()=>this.setState(s=>({viewer:Object.assign({},s.viewer,{name:x.name,url:x.url})}))})),
-      viewerTab: ()=>{ if(st.viewer) window.open(this.blobUrl(st.viewer.url),'_blank'); }, viewerDownload: ()=>{ if(!st.viewer) return; const a=document.createElement('a'); a.href=st.viewer.url; a.download=st.viewer.name||'مستند'; a.click(); },
+      viewerTab: ()=>{ if(st.viewer) window.open(this.blobUrl(st.viewer.url, st.viewer.name),'_blank'); }, viewerDownload: ()=>{ if(!st.viewer) return; const a=document.createElement('a'); a.href=this.blobUrl(st.viewer.url, st.viewer.name); a.download=st.viewer.name||'مستند'; a.click(); },
       closeViewer: ()=>this.setState({viewer:null}),
       hasFile: !!dt.fileUrl, detailFileName: dt.fileName, noFile: !dt.fileUrl && !!(d && (d.t==='exp'||d.t==='bnk')),
       mayEditFile: !!(d && d.t==='exp' && pm.fileEdit && (()=>{ const e=st.expenses.find(x=>x.id===d.id); const cu=e&&cusById[Number(e.cus)]; return !cu || cu.status!=='مسواة'; })()),
       pickFile: e=>{ const fl=e.target.files&&e.target.files[0]; if(!fl||!d) return; const fr=new FileReader(); fr.onload=()=>this.setState(s=>({expenses:s.expenses.map(x=> x.id===d.id ? this.stamp(Object.assign({},x,{file:{name:fl.name,url:String(fr.result).length<3000000?fr.result:''}})) : x)})); fr.readAsDataURL(fl); },
       mayEditExp: !!(d && (d.t==='exp'||d.t==='bnk') && (()=>{ if(d.t==='bnk') return !!pm.edit.bankExpenses; const e=st.expenses.find(x=>x.id===d.id); const cu=e&&cusById[Number(e.cus)]; return !!pm.edit.expenses && (!cu || cu.status!=='مسواة' || pm.approve); })()),
       editExp: ()=>{ if(!d) return; const k=d.t==='bnk'?'bankExpenses':'expenses'; const o=(st[k]||[]).find(x=>x.id===d.id); if(o) this.setState({detail:null,modal:k,form:Object.assign({},o),editId:o.id,err:''}); },
-      openFile: ()=>{ if(dt.fileUrl) this.setState({viewer:{name:dt.fileName||'مرفق الفاتورة',url:dt.fileUrl}}); },
+      openFile: ()=>{ if(!dt.fileUrl) return; const nm = dt.fileName||'مرفق الفاتورة';
+        if(this.isImgFile(dt.fileUrl, nm)){ this.setState({viewer:{name:nm,url:dt.fileUrl}}); return; }
+        const w = window.open(this.blobUrl(dt.fileUrl, nm), '_blank');
+        if(!w) this.setState({viewer:{name:nm,url:dt.fileUrl}}); },
       repCount: repList.length+' عملية', repTotal: this.fmt(repTotal), repVat: this.fmt(repVatSum),
       repEmpty: repList.length===0,
       expResults: ()=>this.excelDoc(
